@@ -17,18 +17,21 @@ for line in open(sys.argv[1]):
 
     read_name = lexemes[0]
     pos = int(lexemes[1])
+    orig = lexemes[2]
+    mut = lexemes[3]
 
     if read_name not in mutations:
         mutations[read_name] = {}
-    mutations[read_name][pos] = (lexemes[2], lexemes[3])
+    mutations[read_name][pos] = {"correct" : orig, "mutation" : mut}
 
 for n, record in enumerate(screed.open(sys.argv[2])):
     orig_reads[record["name"]] = record["sequence"]
 
-print "read\ttp\tfp\ttn\tfn\ttotal_errors"
+tps, fps, tns, fns, tot_errors = 0, 0, 0, 0, 0
+print >>sys.stderr, "#read\ttp\tfp\ttn\tfn\ttotal_errors"
 for n, record in enumerate(screed.open(sys.argv[3])):
     name = record["name"]
-    seq = record["sequence"]
+    seq = record["sequence"][:100]
     orig = orig_reads[name]
 
     read_mut = mutations.get(name, {})
@@ -38,7 +41,7 @@ for n, record in enumerate(screed.open(sys.argv[3])):
         if pos >= len(orig):
             print >>sys.stderr, "{0}\n{1}\n{2}".format(name, seq, orig)
         if pos in read_mut:
-            if seq[pos] == read_mut[pos][1]:
+            if seq[pos] == read_mut[pos]["correct"]:
                 tp += 1
             else:
                 fn += 1
@@ -48,4 +51,11 @@ for n, record in enumerate(screed.open(sys.argv[3])):
             else:
                 fp += 1
 
+    tps += tp
+    fps += fp
+    tns += tn
+    fns += fn
+    tot_errors += len(read_mut)
     print "{0}\t{1}\t{2}\t{3}\t{4}\t{5}".format(name, tp, fp, tn, fn, len(read_mut))
+
+print >>sys.stderr, "Totals\t\t{0}\t{1}\t{2}\t{3}\t{4}".format(tps, fps, tns, fns, tot_errors)
