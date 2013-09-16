@@ -3,5 +3,5 @@
 	url = https://github.com/fishjord/dbg-graph-null
 [submodule "khmer"]
 	path = khmer
-	url = https://github.com/fishjord/khmer
+	url = ./khmer/
 
