@@ -1,0 +1,6 @@
+[submodule "dbg-graph-null"]
+	path = dbg-graph-null
+	url = https://github.com/ctb/dbg-graph-null
+[submodule "khmer"]
+	path = khmer
+	url = ./khmer/
