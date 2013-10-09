@@ -11,7 +11,7 @@ MIN_COV= 5
 
 all: reads.fasta.keepalign read_correction_details.txt
 
-.PHONY: compare
+.PHONY: compare stats.ht
 
 genome.fasta:
 	python $(DBG_NULL)/make-random-genome.py > $@
@@ -21,6 +21,9 @@ reads.fasta: genome.fasta
 
 random.ht: reads.fasta
 	PYTHONPATH=$(KHMER)/python python $(KHMER)/sandbox/normalize-by-align.py --ksize $(KSIZE) -x $(HASH_SIZE) -N $(N_HASHES) -C $(MIN_COV) -t $(TRUSTED_CUTOFF) --bits-theta $(BITS_THETA) -s $@ $< 2> read_align_stats.txt
+
+stats.ht: reads.fasta
+	PYTHONPATH=$(KHMER)/python python normalize-by-align.py --ksize $(KSIZE) -x $(HASH_SIZE) -N $(N_HASHES) -C $(MIN_COV) -t $(TRUSTED_CUTOFF) --mutations mutation_details.txt --bits-theta $(BITS_THETA) -s $@ $<
 
 reads.fasta.keepalign: random.ht
 
