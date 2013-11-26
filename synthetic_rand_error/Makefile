@@ -1,16 +1,16 @@
 KHMER= ../khmer
 DBG_NULL= ../dbg-graph-null/
 
-GENOME_LENGTH = 1000
-READ_COV = 20
+GENOME_LENGTH = 100000
+READ_COV = 100
 
 KSIZE= 30
 HASH_SIZE= 1e7
 N_HASHES= 4
 
-TRUSTED_CUTOFF= 3
+TRUSTED_CUTOFF= 5
 BITS_THETA= 1
-MIN_COV= 5
+DIGINORM_COV= 20
 
 SEQ_FILE = reads.fasta
 
@@ -25,7 +25,7 @@ $(SEQ_FILE): genome.fasta
 	python $(DBG_NULL)/make-reads.py --mutation-details mutation_details.txt --coverage $(READ_COV) $< > $@
 
 norm_by_align.fasta.keepalign: $(SEQ_FILE)
-	python $(KHMER)/sandbox/normalize-by-align.py --details-out alignment_details.txt --ksize $(KSIZE) -x $(HASH_SIZE) -N $(N_HASHES) -C $(MIN_COV) -t $(TRUSTED_CUTOFF) --bits-theta $(BITS_THETA) -s norm_by_align.ht $< && mv $(SEQ_FILE).keepalign $@
+	python $(KHMER)/sandbox/normalize-by-align.py --details-out alignment_details.txt --ksize $(KSIZE) -x $(HASH_SIZE) -N $(N_HASHES) -C $(DIGINORM_COV) -t $(TRUSTED_CUTOFF) --bits-theta $(BITS_THETA) -s norm_by_align.ht $< && mv $(SEQ_FILE).keepalign $@
 
 read_correction_details.txt: norm_by_align.fasta.keepalign $(SEQ_FILE)
 	../compare.py mutation_details.txt $(SEQ_FILE) norm_by_align.fasta.keepalign > read_correction_details.txt
@@ -37,7 +37,7 @@ reads.ht: $(SEQ_FILE)
 	python $(KHMER)/scripts/load-into-counting.py --ksize $(KSIZE) -x $(HASH_SIZE) -N $(N_HASHES) $@ $<
 
 diginorm.ht: $(SEQ_FILE)
-	python $(KHMER)/scripts/normalize-by-median.py --ksize $(KSIZE) -x $(HASH_SIZE) -N $(N_HASHES) -s $@ $<
+	python $(KHMER)/scripts/normalize-by-median.py --ksize $(KSIZE) -x $(HASH_SIZE) -N $(N_HASHES) -C $(DIGINORM_COV) -s $@ $<
 
 preload_corrected.fasta.keepalign: reads.ht $(SEQ_FILE)
 	python $(KHMER)/sandbox/read_aligner.py --trusted-cov $(TRUSTED_CUTOFF) --theta $(BITS_THETA) $< $(SEQ_FILE) > $@ 2> preload_alignment_details.txt
