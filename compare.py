@@ -28,28 +28,48 @@ for n, record in enumerate(screed.open(sys.argv[2])):
     orig_reads[record["name"]] = record["sequence"].upper()
 
 tps, fps, tns, fns, tot_errors = 0, 0, 0, 0, 0
+tot_gaps = 0
+tot_ins = 0
+tot_indels = 0
 print >>sys.stderr, "#read\ttp\tfp\ttn\tfn\ttotal_errors"
 for n, record in enumerate(screed.open(sys.argv[3])):
     name = record["name"]
-    seq = record["sequence"][:100].upper()
+    seq = record["sequence"]
     orig = orig_reads[name]
 
     read_mut = mutations.get(name, {})
     tp, fp, tn, fn = 0, 0, 0, 0
 
+    orig_idx = 0
+
     for pos in range(len(seq)):
-        if pos >= len(orig):
-            print >>sys.stderr, "{0}\n{1}\n{2}".format(name, seq, orig)
-        if pos in read_mut:
-            if seq[pos] == read_mut[pos]["correct"]:
+	if seq[pos].islower():
+             fp += 1
+             tot_indels += 1
+             tot_ins += 1
+             continue
+        elif seq[pos] == "-":
+             fp += 1
+             orig_idx += 1
+             tot_indels += 1
+             tot_gaps += 1
+             continue
+
+        if orig_idx >= len(orig):
+            raise Exception(name)
+
+        if orig_idx in read_mut:
+            if seq[pos] == read_mut[orig_idx]["correct"]:
                 tp += 1
             else:
                 fn += 1
         else:
-            if seq[pos] == orig[pos]:
+            if seq[pos] == orig[orig_idx]:
                 tn += 1
             else:
                 fp += 1
+
+        orig_idx += 1
 
     tps += tp
     fps += fp
@@ -59,3 +79,4 @@ for n, record in enumerate(screed.open(sys.argv[3])):
     print "{0}\t{1}\t{2}\t{3}\t{4}\t{5}".format(name, tp, fp, tn, fn, len(read_mut))
 
 print >>sys.stderr, "Totals\t\t{0}\t{1}\t{2}\t{3}\t{4}".format(tps, fps, tns, fns, tot_errors)
+print >>sys.stderr, "Indels: {0}, Gaps: {1}, Ins: {2}".format(tot_indels, tot_gaps, tot_ins)

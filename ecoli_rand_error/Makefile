@@ -13,7 +13,7 @@ DIGINORM_COV= 20
 
 SEQ_FILE = reads.fasta
 
-all: ideal_correction_details.txt read_correction_details.txt preload_correction_details.txt diginorm_correction_details.txt
+all: ideal_correction_details.txt preload_correction_details.txt diginorm_correction_details.txt #read_correction_details.txt 
 
 .PHONY: all clean
 

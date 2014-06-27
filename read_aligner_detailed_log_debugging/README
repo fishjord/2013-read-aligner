@@ -1,0 +1,9 @@
+The makefile and ipython notebook in this directory are designed to aid in
+debugging paths explored by the read_aligner through the combined graph
+structure.  This requires khmer be built with READ_ALIGNER_DEBUG (in 
+lib/read_aligner.hh) be set to 1.
+
+The results will be easiest to work with if you test with only one query,
+even better if you test with only one path.  If you are running in to oom
+errors you may also wish to do a ulimit before collecting the debug output
+to reduce the total amount of data.
